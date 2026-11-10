@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1e1b24">
+    <meta name="description" content="A friendly, simple way to split a restaurant bill.">
+    <title>Tabby — split the bill, not the good vibes</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <!-- The top bar keeps persistence feedback and the theme switch within reach. -->
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Tabby home">
+        <span class="brand-mark" aria-hidden="true">t.</span>
+        <span>tabby</span>
+      </a>
+      <div class="topbar-actions">
+        <span class="saved-label" id="save-status" role="status" aria-live="polite">Ready when you are</span>
+        <button class="button button-quiet theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+          <span aria-hidden="true" id="theme-icon">☀</span>
+          <span id="theme-label">Light mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Bill setup and per-person settlement are grouped for a mobile-first flow. -->
+    <main class="page-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Good food. Clear tabs.</p>
+          <h1>Split the bill,<br><span>not the good vibes.</span></h1>
+          <p class="hero-copy">Add the order, invite your people, and let the math take care of itself.</p>
+        </div>
+        <div class="hero-sticker" aria-hidden="true">
+          <span>✳</span>
+          <small>made for<br>the group chat</small>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <div class="left-column">
+          <section class="card section-card" aria-labelledby="people-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">The table</p>
+                <h2 id="people-heading">Who's dining?</h2>
+              </div>
+              <span class="count-pill" id="diner-count">0 people</span>
+            </div>
+            <form class="inline-form diner-form" id="diner-form">
+              <label class="sr-only" for="diner-name">Friend's name</label>
+              <input id="diner-name" name="name" type="text" maxlength="40" placeholder="Add a name, like Sarah" autocomplete="off" required>
+              <button class="button button-primary" type="submit">Add person <span aria-hidden="true">＋</span></button>
+            </form>
+            <div class="diner-list" id="diner-list" aria-live="polite"></div>
+            <p class="helper-text">Tap a person's name on any item to add them to the split.</p>
+          </section>
+
+          <section class="card section-card" aria-labelledby="items-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">The order</p>
+                <h2 id="items-heading">Add the good stuff</h2>
+              </div>
+              <span class="count-pill" id="item-count">0 items</span>
+            </div>
+            <form class="item-form" id="item-form">
+              <div class="item-inputs">
+                <label class="field field-name">
+                  <span>Item name</span>
+                  <input id="item-name" name="name" type="text" maxlength="80" placeholder="Truffle fries" required>
+                </label>
+                <label class="field">
+                  <span>Price</span>
+                  <span class="input-with-prefix"><span aria-hidden="true">$</span><input id="item-price" name="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="12.00" required></span>
+                </label>
+                <label class="field quantity-field">
+                  <span>Qty</span>
+                  <input id="item-quantity" name="quantity" type="number" min="1" step="1" value="1" inputmode="numeric" required>
+                </label>
+              </div>
+              <div class="form-actions">
+                <span class="form-error" id="item-error" role="alert"></span>
+                <div class="button-row">
+                  <button class="button button-quiet hidden" id="cancel-edit" type="button">Cancel</button>
+                  <button class="button button-primary" id="item-submit" type="submit">Add to receipt <span aria-hidden="true">↗</span></button>
+                </div>
+              </div>
+            </form>
+            <div class="receipt-list" id="receipt-list" aria-live="polite"></div>
+            <div class="receipt-total">
+              <span>Food total</span>
+              <strong id="food-total">$0.00</strong>
+            </div>
+          </section>
+
+          <section class="card section-card fees-card" aria-labelledby="fees-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">The extras</p>
+                <h2 id="fees-heading">Fees &amp; tip</h2>
+              </div>
+              <span class="tiny-note">Applied to each person's order</span>
+            </div>
+            <div class="fee-grid">
+              <label class="field">
+                <span>Service fee</span>
+                <span class="input-with-suffix"><input id="service-fee" type="number" min="0" max="100" step="0.1" inputmode="decimal" aria-label="Service fee percentage"><span>%</span></span>
+              </label>
+              <label class="field">
+                <span>Tax / VAT</span>
+                <span class="input-with-suffix"><input id="tax-fee" type="number" min="0" max="100" step="0.1" inputmode="decimal" aria-label="Tax or VAT percentage"><span>%</span></span>
+              </label>
+              <label class="field">
+                <span>Tip <span class="optional">(optional)</span></span>
+                <span class="input-with-suffix"><input id="tip-fee" type="number" min="0" max="100" step="0.1" inputmode="decimal" aria-label="Tip percentage"><span>%</span></span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <aside class="right-column">
+          <section class="card invite-card" aria-labelledby="invite-heading">
+            <div class="invite-icon" aria-hidden="true">↗</div>
+            <div>
+              <p class="eyebrow">Bring everyone in</p>
+              <h2 id="invite-heading">Let them claim their bites</h2>
+              <p>Share a link so everyone can pick what they had on their own phone.</p>
+            </div>
+            <button class="button button-light" id="invite-button" type="button">Copy invite link <span aria-hidden="true">⌁</span></button>
+          </section>
+
+          <section class="card unclaimed-card" id="unclaimed-card" aria-live="polite">
+            <div class="unclaimed-icon" aria-hidden="true">!</div>
+            <div>
+              <strong id="unclaimed-title">Everything claimed</strong>
+              <p id="unclaimed-detail">Add items and diners to get started.</p>
+            </div>
+          </section>
+
+          <section class="card section-card breakdown-card" aria-labelledby="breakdown-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">The happy ending</p>
+                <h2 id="breakdown-heading">Final breakdown</h2>
+              </div>
+              <span class="count-pill" id="total-due">$0.00 total</span>
+            </div>
+            <div id="breakdown-list" class="breakdown-list" aria-live="polite"></div>
+            <button class="button button-secondary copy-summary" id="copy-summary" type="button">Copy group summary <span aria-hidden="true">▣</span></button>
+          </section>
+          <p class="privacy-note"><span aria-hidden="true">♡</span> Your bill stays in this browser. Invite links contain your bill details.</p>
+        </aside>
+      </div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+    <footer class="footer">A little less math, a lot more dessert. <span aria-hidden="true">✳</span></footer>
+  </body>
+</html>
